@@ -1,3 +1,4 @@
 *.doc
 *.docx
-Kmeans/.idea/*
+./Kmeans/.idea/*
+*.pdf
