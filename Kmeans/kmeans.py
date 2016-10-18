@@ -13,6 +13,9 @@ class Kmean(object):
 		self.dim = int
 		self.centers = []
 		self.clusters = {}
+		self.index2point = {}
+		self.label = {}
+		self.getlabel()
 		self.readdata_csv()
 		#self.readdata()
 		self.setcenter()
@@ -27,12 +30,13 @@ class Kmean(object):
 
 	def readdata_csv(self):
 		f = open('ClusterSamples.csv')
+		count = 1
 		for item in f:
 			item = item[0:-1].split(',')
 			item = map(float, item)
 			self.data.append(item)
-
-
+			self.index2point[count] = item
+			count += 1
 
 	def dist(self, p1=list, p2=list):
 		distsum = 0.0
@@ -90,17 +94,23 @@ class Kmean(object):
 				centers[i] = self.updatecenter(clusters[i])
 				pass
 
-			print 'New center:'
 			print '{}th itor'.format(str(count))
 			if centers_copy == self.centers:
-				f = open('out.txt', 'w')
+				f = open('out_index.txt', 'w')
 				for item in clusters:
 					f.write('{}class\n'.format(item))
 					for point in clusters[item]:
-						f.write(str(point)+'\n')
+						key = self.search(self.index2point, point)
+						f.write(str(key)+'\n')
 					f.write('\n')
 				return clusters
 
+	def getlabel(self):
+		f = open('SampleLabels.csv')
+		count = 1
+		for item in f:
+			self.label[count] = item[:-1]
+			count += 1
 
 	def plot_simulate(self):
 		cluster = self.algorithm()
@@ -119,5 +129,59 @@ class Kmean(object):
 					plt.scatter(point[0], point[1], c=color[index], marker=marker[index], label = label[index],alpha=0.6)
 		plt.savefig('k-means_simulate.jpg')
 
+	def search(self, d =dict, val = list):
+		for item in d:
+			if d[item] == val:
+				return item
+
+	def plot_minist(self):
+		f = open('out_index.txt')
+		clusterSize = []
+		clusters    = []
+		clusterLabel = []
+		for item in f:
+			if 'class' in item:
+				L = []
+				continue
+
+			if item == '\n':
+				clusters.append(L)
+				del(L)
+				continue
+			L.append(item)
+
+		for item in clusters:
+			L = []
+			for elm in item:
+				elm = elm.replace('\n', '')
+				print type(self.label[int(elm)])
+				L.append(self.label[int(elm)])
+			allLebal.append(L)
+			del(L)
+
+		print len(allLebal)
+
+		f = open('count.csv', 'w')
+		count = 0
+		for item in allLebal:
+			f.write('class{},'.format(str(count)))
+			for i in range(0, len(allLebal)):
+				f.write(str(item.count(str(i)))+',')
+			f.write('\n')
+			count += 1 
+
+		clusterSize = map(len, clusters)
+		axis = []
+		label = []
+		for i in range(0, len(clusterSize)):
+			axis.append(i)
+			label.append('Class'+str(i))
+
+		plt.title(u'The histogram of {} clusters using Minist Data (10000 samples)'.format(str(len(clusterSize))))
+		plt.bar(axis, clusterSize, color = ['#4682b4'], tick_label = label, align='center', width=0.3, alpha=0.8,linewidth=None)
+		plt.savefig('Hist.jpg')
+		plt.show()
+
 K = Kmean(10)
-K.algorithm()
+#K.algorithm()
+K.plot_minist()
