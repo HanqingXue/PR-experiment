@@ -150,18 +150,18 @@ class Kmean(object):
 				continue
 			L.append(item)
 
+		allLebal = []
 		for item in clusters:
 			L = []
 			for elm in item:
 				elm = elm.replace('\n', '')
-				print type(self.label[int(elm)])
 				L.append(self.label[int(elm)])
 			allLebal.append(L)
 			del(L)
 
 		print len(allLebal)
 
-		f = open('count.csv', 'w')
+		f = open('count3.csv', 'w')
 		count = 0
 		for item in allLebal:
 			f.write('class{},'.format(str(count)))
@@ -178,10 +178,10 @@ class Kmean(object):
 			label.append('Class'+str(i))
 
 		plt.title(u'The histogram of {} clusters using Minist Data (10000 samples)'.format(str(len(clusterSize))))
-		plt.bar(axis, clusterSize, color = ['#4682b4'], tick_label = label, align='center', width=0.3, alpha=0.8,linewidth=None)
-		plt.savefig('Hist.jpg')
+		plt.bar(axis, clusterSize, color = ['#4682b4'], label = label, align='center', width=0.3, alpha=0.8,linewidth=None)
+		plt.savefig('Hist3.jpg')
 		plt.show()
 
 K = Kmean(10)
-#K.algorithm()
+K.algorithm()
 K.plot_minist()
