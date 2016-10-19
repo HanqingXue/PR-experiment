@@ -82,7 +82,7 @@ class Perceptron(object):
 		numx = np.array(x)
 		y = -((self.w[0])/(self.w[1]))*x - self.b/self.w[1]
 		plt.plot(x,y,marker='x',color='r')
-		plt.savefig('Perceptron.jpg')
+		#plt.savefig('Perceptron.jpg')
 		plt.show()
 		pass
 
