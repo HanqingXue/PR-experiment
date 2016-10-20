@@ -59,6 +59,7 @@ class Perceptron(object):
 		fig = plt.figure()
 		ax1 = fig.add_subplot(111)
 		ax1.set_title("Perceptron")
+		#help(ax1.annotate)
 		plt.xlabel('x')
 		plt.ylabel('y')
 		color = ['r','b']
@@ -81,8 +82,14 @@ class Perceptron(object):
 		x = range(0,3)
 		numx = np.array(x)
 		y = -((self.w[0])/(self.w[1]))*x - self.b/self.w[1]
+		k = str(-((self.w[0])/(self.w[1])))
+		b = str(- self.b/self.w[1])
+		ax1.annotate('y={0}x +{1} '.format(k[1:-1],b[1:-1]), (x[0],y[0]))
+		print 'k:{0}\n'.format(k)
+		print 'b:{0}'.format(b)
+		#print 'b:{0}\n'
 		plt.plot(x,y,marker='x',color='r')
-		#plt.savefig('Perceptron.jpg')
+		plt.savefig('Perceptron.jpg')
 		plt.show()
 		pass
 
