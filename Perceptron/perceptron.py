@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 
 class Perceptron(object):
 	"""docstring for Perceptron"""
-	def __init__(self,study_step=0.0001, study_total=10000):
+	def __init__(self,study_step=0.0000001, study_total=10000):
 		super(Perceptron, self).__init__()
 		self.datadic = {}
 		self.label = {}
@@ -24,24 +24,31 @@ class Perceptron(object):
 			count += 1
 		pass
 
-	def train(self):
+	def train(self, trainlabel=str):
 		train_size = len(self.label)
 		datadim = len(self.data[0])
 		w = np.zeros((datadim, 1))
-		b = 0
+		b = 0.0
 
 		study_count = 0  # 学习次数记录，只有当分类错误时才会增加
 		nochange_count = 0  # 统计连续分类正确数，当分类错误时归为0
-		nochange_upper_limit = 100000
-
+		nochange_upper_limit = 25000
+		count = 0
 		while True:
 			nochange_count += 1
 			if nochange_count > nochange_upper_limit:
+				print 'break0'
 				break
 			index = random.randint(0, train_size-1)
+			#index = count
+			count += 1 
 			point = self.data[index]
 			label = self.label[index]
-			yi = int(label)
+			#yi = int(label)
+			if label == trainlabel:
+				yi = 1
+			else:
+				yi = -1
 			result = yi *(np.dot(point, w) + b )
 			if result <= 0:
 				item = np.reshape(self.data[index], (datadim, 1))
@@ -49,10 +56,14 @@ class Perceptron(object):
 				b += yi * self.study_step
 				study_count += 1
 				if study_count > self.study_total:
+					print 'break1'
 					break
 				nochange_count = 0
+			if count > 10000:
+				count = 0
 		self.w = w
 		self.b = b
+		print  type(w)
 		return w, b
 
 	def train_plot(self):
@@ -67,7 +78,6 @@ class Perceptron(object):
 		marker = ['x', 'o']
 		count = 0
 		for index in self.data:
-			print self.label[count]
 			if self.label[count] == '1':
 				label = 'o'
 				pcolor = 'g'
@@ -92,7 +102,22 @@ class Perceptron(object):
 		plt.savefig('Perceptron.jpg')
 		plt.show()
 		pass
-
+	def test(self):
+		weigh = np.loadtxt('weight.csv', delimiter=',')
+		#b = -11188293700.0
+		b = -80793100.0
+		testbench = np.loadtxt('TestSamples.csv', delimiter=',')
+		re = np.dot(testbench, weigh) - b
+		count = 0
+		count2 = 0
+		for i in range(0, len(re)):
+			if self.label[i] == '9':
+				count += 1
+				if re[i] > 0:
+					count2 += 1
+		print count2
+		print count
+		print float(count2)/float(count)
 P = Perceptron(100)
-print P.train()
+P.train('1')
 P.train_plot()
