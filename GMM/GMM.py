@@ -1,6 +1,10 @@
 import numpy as np
 from numpy import *
 import math
+import copy
+from numpy.lib.scimath import logn
+from math import e
+from matplotlib import pyplot as plt
 class Guass(object):
 	"""docstring for Guass"""
 	def __init__(self, mean, cov):
@@ -9,7 +13,7 @@ class Guass(object):
 
 	def setGuassargs(self, mean, cov):
 		self.mean = mean
-		self.mean = cov
+		self.cov = cov
 
 
 	def N(self, sample):
@@ -29,27 +33,111 @@ class GMM(object):
 		self.guassList = []
 		self.meanList = []
 		self.covList = []
-		self.loaddata()
 		self.piList = []
-	
+		self.traindata = []
+		self.likelihoods = 0.0
+		self.loaddata()
+		self.calLikelihood()
+
 	def loaddata(self):
 		self.meanList = np.loadtxt('meanarg.csv', delimiter=',')
 		for i in range(0 , self.Mnum):
 			covMatrix =  np.loadtxt('cov{}.csv'.format(str(i)), delimiter=',')
 			self.covList.append(covMatrix)
+
 		self.piList = [1.0/3, 2.0/3]
 		for i in range(0, self.Mnum):
 			guassModel = Guass(self.meanList[i], self.covList[i])
 			self.guassList.append(guassModel)
+
+		self.traindata = np.loadtxt('Train1.csv', delimiter=',')
+
+
 	def algothrim(self):
-		#E steps
-        #M steps
+			#E steps
+		while True:
+			gauss =  self.guassList
+			nxMatrix = []
+			for i in range(0, self.Mnum):
+				matrixRow = []
+				for j in range(0, len(self.traindata)):
+					Nx = self.guassList[i].N(self.traindata[j])
+					matrixRow.append(Nx*self.piList[i])
+				nxMatrix.append(matrixRow)
+			nxMatrix = np.matrix(nxMatrix)
+			#cal the pr and get the matrix
+			colsum = []
+			for j in range(0, nxMatrix.T.shape[0]):
+				colsum.append(sum(nxMatrix.T[j]))
+				pass
+	
+			prMatrixs = []
+			for i in range(0, self.Mnum):
+				prrow = []
+				for j in range(0, len(self.traindata)):
+					prrow.append(nxMatrix.A[i][j]/colsum[j])
+					pass
+				prMatrixs.append(prrow)
+	
+			prMatrixs = np.matrix(prMatrixs)
+	
+			Nk = []
+			for i in range(0, self.Mnum):
+				s = sum(prMatrixs[i].A)
+				Nk.append(s)
+			#update center
+			for k in range(0, self.Mnum):
+				for n in range(0,len(self.traindata)):
+					self.meanList[k] += prMatrixs.A[k][n]*self.traindata[n]
+				index = (1.0/Nk[k])
+				self.meanList[k] *= index
+	
+			mean = copy.deepcopy(self.meanList)
+	
+			for k in range(0, self.Mnum):
+				temp = []
+				for n in range(0, len(self.traindata)):
+					sub = np.matrix(self.traindata[n] - mean[k])
+					temp.append((sub.T* sub)*prMatrixs.A[k][n])
+	
+				sumMatrix = temp[0]
+				for i in range(1, len(temp)):
+					sumMatrix = np.add(sumMatrix, temp[i])
+	
+	
+				index = (1.0 / Nk[k])
+				self.covList[k] = sumMatrix*index
+	
+			pik = map(lambda x:x/float(len(self.traindata)), Nk)
+			self.piList = pik
+			print self.piList
+			for k in range(0, self.Mnum):
+				self.guassList[k].setGuassargs(self.meanList[k], self.covList[k])
+			self.calLikelihood()
+
+	def plot(self):
+		'''
+		for item in self.traindata:
+			print item
+			plt.scatter(item[0], item[1])
+		plt.show()
+		'''
 		pass
 
-'''
-mean = np.loadtxt('meanarg.csv', delimiter=',')
-cov  = np.loadtxt('guassarg.csv', delimiter=',')
-sample = np.loadtxt('sampledemo.csv', delimiter=',')
-'''
+	def calLikelihood(self):
+		sumlikehood = 0.0
+		for n in range(0, len(self.traindata)):
+			likehood = 0.0
+			for k in range(0, self.Mnum):
+				likehood += self.piList[k]*self.guassList[k].N(self.traindata[n])
+			sumlikehood += logn(e, likehood)
+		self.likehoods = sumlikehood
+		print self.likehoods
+		pass
 
-G2 = GMM(2)
+if __name__ == '__main__':
+	G2 = GMM(2)
+	G2.calLikelihood()
+	G2.algothrim()
+	#print type(G2.traindata[0])
+	matrix = np.matrix('1,2;2,3')
