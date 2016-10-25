@@ -5,6 +5,8 @@ import copy
 from numpy.lib.scimath import logn
 from math import e
 from matplotlib import pyplot as plt
+from matplotlib.patches import Ellipse, Circle
+import matplotlib.pyplot as plt
 class Guass(object):
 	"""docstring for Guass"""
 	def __init__(self, mean, cov):
@@ -38,6 +40,7 @@ class GMM(object):
 		self.likelihoods = 0.0
 		self.loaddata()
 		self.calLikelihood()
+		self.algothrim()
 
 	def loaddata(self):
 		self.meanList = np.loadtxt('meanarg.csv', delimiter=',')
@@ -56,7 +59,7 @@ class GMM(object):
 			#E steps
 		count = 0
 		while True:
-			print '{}th itor'.format(str(count))
+			#print '{}th itor'.format(str(count))
 			count += 1
 			oldlikehood = copy.deepcopy(self.likehoods)
 			gauss =  self.guassList
@@ -113,8 +116,8 @@ class GMM(object):
 	
 			pik = map(lambda x:x/float(len(self.traindata)), Nk)
 			self.piList = pik
-			print self.meanList
-			print self.likehoods
+			#print self.meanList
+			#print self.likehoods
 			for k in range(0, self.Mnum):
 				self.guassList[k].setGuassargs(self.meanList[k], self.covList[k])
 			self.calLikelihood()
@@ -126,7 +129,7 @@ class GMM(object):
 	def plot(self):
 		'''
 		for item in self.traindata:
-			print item
+			#print item
 			plt.scatter(item[0], item[1])
 		plt.show()
 		'''
@@ -156,8 +159,70 @@ class GMM(object):
 		#prob = round(prob, 6)
 		return prob
 
+class TestGMM(object):
+	"""docstring for TestGMM"""
+	def __init__(self, testname):
+		super(TestGMM, self).__init__()
+		self.testname = testname
+		self.loadtestdata()
+
+	def loadtestdata(self):
+		self.testData = np.loadtxt(self.testname, delimiter=',')
+		 
+	def test(self):
+		GMM1 = GMM(2, 'Train1.csv')
+		GMM2 = GMM(2, 'Train2.csv')
+		error = 0
+		for item in self.testData:
+			if GMM1.problailty(item) >= GMM2.problailty(item):
+				continue
+			else:
+				error += 1
+		ac =  float(error)/float(len(self.testData))
+
+		if self.testname == 'Test2.csv':
+			pass
+		else:
+			ac = 1.0 - ac
+		print 'Accuracy:{0}.'.format(str(ac))
+		return ac
+class plotGMM(object):
+	"""docstring for plotGMM"""
+	def __init__(self, GMM, fname):
+		super(plotGMM, self).__init__()
+		self.GMM = GMM
+		self.fname = fname
+		self.loaddata()
+
+	def loaddata(self):
+		data = np.loadtxt('Train1.csv', delimiter=',')
+		data1 = np.loadtxt('Train2.csv', delimiter=',')
+		fig = plt.figure()
+		ax = fig.add_subplot(111)
+
+		ell1 = Ellipse(xy=(0.0, 0.0), width=6, height=14, angle=-70.0, facecolor='yellow', alpha=0.3)
+		ell2 = Ellipse(xy=(10, 10), width=9, height=16, angle=-30.0, facecolor='yellow', alpha=0.3)
+		ell3 = Ellipse(xy=(2, 10), width=5, height=16, angle=-30.0, facecolor='red', alpha=0.3)
+		ell4 = Ellipse(xy=(15, 20), width=2.4, height=16, angle=-65.0, facecolor='red', alpha=0.3)
+		ax.add_patch(ell1)
+		ax.add_patch(ell2)
+		ax.add_patch(ell3)
+		ax.add_patch(ell4)
+
+		#help(Ellipse)
+		x, y = 0, 0
+		ax.plot(x, y, 'ro')
+
+		plt.axis('scaled')
+		# ax.set_xlim(-4, 4)
+		# ax.set_ylim(-4, 4)
+		plt.axis('equal')  # changes limits of x or y axis so that equal increments of x and y have the same length
+		plt.axis([-10, 25, -20, 33])
+		for item, item1 in zip(data, data1):
+			plt.scatter(item[0], item[1], marker='o', color='r')
+			plt.scatter(item1[0], item1[1], marker='^')
+		plt.show()
+
 if __name__ == '__main__':
-	G2 = GMM(2, 'Train1.csv')
-	G2.algothrim()
-	G2.problailty([1,2])
-	G2.writeResult()
+	GMM1 = GMM(2, 'Train1.csv')
+	plotGMM(GMM1, 'Train1.csv')
