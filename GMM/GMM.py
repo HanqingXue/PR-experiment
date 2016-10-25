@@ -15,7 +15,6 @@ class Guass(object):
 		self.mean = mean
 		self.cov = cov
 
-
 	def N(self, sample):
 		sample = np.matrix(sample)
 		D = self.cov.shape[0]
@@ -27,7 +26,7 @@ class Guass(object):
 
 class GMM(object):
 	"""docstring for GMM"""
-	def __init__(self, Mnum):
+	def __init__(self, Mnum, trfname):
 		super(GMM, self).__init__()
 		self.Mnum = Mnum #The number of Guass
 		self.guassList = []
@@ -35,6 +34,7 @@ class GMM(object):
 		self.covList = []
 		self.piList = []
 		self.traindata = []
+		self.trfname = trfname
 		self.likelihoods = 0.0
 		self.loaddata()
 		self.calLikelihood()
@@ -50,8 +50,7 @@ class GMM(object):
 			guassModel = Guass(self.meanList[i], self.covList[i])
 			self.guassList.append(guassModel)
 
-		self.traindata = np.loadtxt('Train2.csv', delimiter=',')
-
+		self.traindata = np.loadtxt(self.trfname, delimiter=',')
 
 	def algothrim(self):
 			#E steps
@@ -124,7 +123,6 @@ class GMM(object):
 			else:
 				break
 
-
 	def plot(self):
 		'''
 		for item in self.traindata:
@@ -133,6 +131,13 @@ class GMM(object):
 		plt.show()
 		'''
 		pass
+
+	def writeResult(self):
+		out = open('GMM_{}_Result.csv'.format(self.trfname[:-4]), 'w')
+		alphas = map(str, self.piList)
+		for i in range(0, self.Mnum):
+			out.write('{0},{1},{2}'.format(alphas[i], str(self.meanList[i]), str(self.covList[i])))
+			out.write('\n')
 
 	def calLikelihood(self):
 		sumlikehood = 0.0
@@ -144,8 +149,15 @@ class GMM(object):
 		self.likehoods = sumlikehood
 		pass
 
+	def problailty(self, sample):
+		prob = 0.0
+		for i in range(self.Mnum):
+			prob += self.piList[i]* self.guassList[i].N(sample)
+		#prob = round(prob, 6)
+		return prob
+
 if __name__ == '__main__':
-	G2 = GMM(2)
-	G2.calLikelihood()
+	G2 = GMM(2, 'Train1.csv')
 	G2.algothrim()
-	matrix = np.matrix('1,2;2,3')
+	G2.problailty([1,2])
+	G2.writeResult()
