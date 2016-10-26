@@ -50,12 +50,16 @@ class GMM(object):
 			guassModel = Guass(self.meanList[i], self.covList[i])
 			self.guassList.append(guassModel)
 
-		self.traindata = np.loadtxt('Train1.csv', delimiter=',')
+		self.traindata = np.loadtxt('Train2.csv', delimiter=',')
 
 
 	def algothrim(self):
 			#E steps
+		count = 0
 		while True:
+			print '{}th itor'.format(str(count))
+			count += 1
+			oldlikehood = copy.deepcopy(self.likehoods)
 			gauss =  self.guassList
 			nxMatrix = []
 			for i in range(0, self.Mnum):
@@ -110,10 +114,16 @@ class GMM(object):
 	
 			pik = map(lambda x:x/float(len(self.traindata)), Nk)
 			self.piList = pik
-			print self.piList
+			print self.meanList
+			print self.likehoods
 			for k in range(0, self.Mnum):
 				self.guassList[k].setGuassargs(self.meanList[k], self.covList[k])
 			self.calLikelihood()
+			if self.likehoods > oldlikehood:
+				continue
+			else:
+				break
+
 
 	def plot(self):
 		'''
@@ -132,12 +142,10 @@ class GMM(object):
 				likehood += self.piList[k]*self.guassList[k].N(self.traindata[n])
 			sumlikehood += logn(e, likehood)
 		self.likehoods = sumlikehood
-		print self.likehoods
 		pass
 
 if __name__ == '__main__':
 	G2 = GMM(2)
 	G2.calLikelihood()
 	G2.algothrim()
-	#print type(G2.traindata[0])
 	matrix = np.matrix('1,2;2,3')
