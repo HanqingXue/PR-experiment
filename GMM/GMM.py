@@ -4,9 +4,9 @@ import math
 import copy
 from numpy.lib.scimath import logn
 from math import e
-from matplotlib import pyplot as plt
 from matplotlib.patches import Ellipse, Circle
 import matplotlib.pyplot as plt
+import random
 class Guass(object):
 	"""docstring for Guass"""
 	def __init__(self, mean, cov):
@@ -22,6 +22,7 @@ class Guass(object):
 		D = self.cov.shape[0]
 		indexone = 1 / pow(2 * np.pi, D / 2)
 		indextwo = 1 / pow(np.linalg.det(self.cov), 0.5)
+		temp = np.linalg.det(self.cov)
 		covB = self.cov.I
 		result = -0.5*(sample - self.mean)*(covB)*(sample - self.mean).T
 		return indexone*indextwo*math.exp(result)
@@ -54,6 +55,19 @@ class GMM(object):
 			self.guassList.append(guassModel)
 
 		self.traindata = np.loadtxt(self.trfname, delimiter=',')
+
+	def loaddatainit(self):
+		self.traindata = np.loadtxt(self.trfname, delimiter=',')
+		for i in range(self.Mnum):
+			self.piList.append(1.0/self.Mnum)
+		self.meanList = random.sample(self.traindata, self.Mnum)
+		for item in self.meanList:
+			self.covList.append(np.mat(eye(2,2,dtype=int)))
+
+		for i in range(0, self.Mnum):
+			guassModel = Guass(self.meanList[i], self.covList[i])
+			self.guassList.append(guassModel)
+		pass
 
 	def algothrim(self):
 			#E steps
@@ -121,19 +135,12 @@ class GMM(object):
 			for k in range(0, self.Mnum):
 				self.guassList[k].setGuassargs(self.meanList[k], self.covList[k])
 			self.calLikelihood()
+			print self.meanList
+			print self.likehoods
 			if self.likehoods > oldlikehood:
 				continue
 			else:
 				break
-
-	def plot(self):
-		'''
-		for item in self.traindata:
-			#print item
-			plt.scatter(item[0], item[1])
-		plt.show()
-		'''
-		pass
 
 	def writeResult(self):
 		out = open('GMM_{}_Result.csv'.format(self.trfname[:-4]), 'w')
@@ -150,7 +157,6 @@ class GMM(object):
 				likehood += self.piList[k]*self.guassList[k].N(self.traindata[n])
 			sumlikehood += logn(e, likehood)
 		self.likehoods = sumlikehood
-		pass
 
 	def problailty(self, sample):
 		prob = 0.0
@@ -186,6 +192,7 @@ class TestGMM(object):
 			ac = 1.0 - ac
 		print 'Accuracy:{0}.'.format(str(ac))
 		return ac
+
 class plotGMM(object):
 	"""docstring for plotGMM"""
 	def __init__(self, GMM, fname):
@@ -199,11 +206,18 @@ class plotGMM(object):
 		data1 = np.loadtxt('Train2.csv', delimiter=',')
 		fig = plt.figure()
 		ax = fig.add_subplot(111)
+		plt.title("Sketck of GMM1 and GMM2")
 
 		ell1 = Ellipse(xy=(0.0, 0.0), width=6, height=14, angle=-70.0, facecolor='yellow', alpha=0.3)
 		ell2 = Ellipse(xy=(10, 10), width=9, height=16, angle=-30.0, facecolor='yellow', alpha=0.3)
 		ell3 = Ellipse(xy=(2, 10), width=5, height=16, angle=-30.0, facecolor='red', alpha=0.3)
 		ell4 = Ellipse(xy=(15, 20), width=2.4, height=16, angle=-65.0, facecolor='red', alpha=0.3)
+
+		plt.annotate("GMM1:Guass1", xy = (0, 0), xytext = (-10, -3))
+		plt.annotate("GMM1:Guass2", xy=(10, 10), xytext=(15, 10))
+		plt.annotate("GMM2:Guass2", xy=(10, 10), xytext=(-5, 10))
+		plt.annotate("GMM2:Guass2", xy=(10, 10), xytext=(15, 23))
+		help(plt.annotate)
 		ax.add_patch(ell1)
 		ax.add_patch(ell2)
 		ax.add_patch(ell3)
@@ -219,10 +233,15 @@ class plotGMM(object):
 		plt.axis('equal')  # changes limits of x or y axis so that equal increments of x and y have the same length
 		plt.axis([-10, 25, -20, 33])
 		for item, item1 in zip(data, data1):
-			plt.scatter(item[0], item[1], marker='o', color='r')
+			plt.scatter(item[0], item[1], s=25,marker='o', color='r')
 			plt.scatter(item1[0], item1[1], marker='^')
+		plt.scatter(0, 0, s=25, marker='D', color='r')
+		plt.savefig('sketck.jpg')
 		plt.show()
 
 if __name__ == '__main__':
-	GMM1 = GMM(2, 'Train1.csv')
-	plotGMM(GMM1, 'Train1.csv')
+	GMM1 = GMM(2, 'Train2.csv')
+	#plotGMM(GMM1, 'Train1.csv')
+	print GMM1.piList
+	print GMM1.meanList
+	print GMM1.covList
