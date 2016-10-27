@@ -50,8 +50,9 @@ class GMM(object):
 			self.piList.append(1.0/self.Mnum)
 		kmeans = KMeans(n_clusters=2, random_state=0).fit(self.traindata)
 		self.meanList = kmeans.cluster_centers_
+		dim = len(self.traindata[0])
 		for item in self.meanList:
-			self.covList.append(np.mat(eye(2,2,dtype=int)))
+			self.covList.append(np.mat(eye(dim,dim,dtype=int)))
 
 		for i in range(0, self.Mnum):
 			guassModel = Guass(self.meanList[i], self.covList[i])
@@ -225,8 +226,9 @@ class plotGMM(object):
 		plt.show()
 
 if __name__ == '__main__':
-	GMM1 = GMM(2, 'Train1.csv')
+	GMM1 = GMM(2, 'Train2.csv')
+	print 'ok'
 	#plotGMM(GMM1, 'Train1.csv')
-	print GMM1.piList
-	print GMM1.meanList
-	print GMM1.covList
+	#print GMM1.piList
+	#print GMM1.meanList
+	#print GMM1.covList
