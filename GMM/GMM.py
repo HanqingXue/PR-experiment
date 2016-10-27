@@ -7,6 +7,7 @@ from math import e
 from matplotlib.patches import Ellipse, Circle
 import matplotlib.pyplot as plt
 import random
+from sklearn.cluster import KMeans
 class Guass(object):
 	"""docstring for Guass"""
 	def __init__(self, mean, cov):
@@ -44,23 +45,11 @@ class GMM(object):
 		self.algothrim()
 
 	def loaddata(self):
-		self.meanList = np.loadtxt('meanarg.csv', delimiter=',')
-		for i in range(0 , self.Mnum):
-			covMatrix =  np.loadtxt('cov{}.csv'.format(str(i)), delimiter=',')
-			self.covList.append(covMatrix)
-
-		self.piList = [1.0/3, 2.0/3]
-		for i in range(0, self.Mnum):
-			guassModel = Guass(self.meanList[i], self.covList[i])
-			self.guassList.append(guassModel)
-
-		self.traindata = np.loadtxt(self.trfname, delimiter=',')
-
-	def loaddatainit(self):
 		self.traindata = np.loadtxt(self.trfname, delimiter=',')
 		for i in range(self.Mnum):
 			self.piList.append(1.0/self.Mnum)
-		self.meanList = random.sample(self.traindata, self.Mnum)
+		kmeans = KMeans(n_clusters=2, random_state=0).fit(self.traindata)
+		self.meanList = kmeans.cluster_centers_
 		for item in self.meanList:
 			self.covList.append(np.mat(eye(2,2,dtype=int)))
 
@@ -130,13 +119,9 @@ class GMM(object):
 	
 			pik = map(lambda x:x/float(len(self.traindata)), Nk)
 			self.piList = pik
-			#print self.meanList
-			#print self.likehoods
 			for k in range(0, self.Mnum):
 				self.guassList[k].setGuassargs(self.meanList[k], self.covList[k])
 			self.calLikelihood()
-			print self.meanList
-			print self.likehoods
 			if self.likehoods > oldlikehood:
 				continue
 			else:
@@ -240,7 +225,7 @@ class plotGMM(object):
 		plt.show()
 
 if __name__ == '__main__':
-	GMM1 = GMM(2, 'Train2.csv')
+	GMM1 = GMM(2, 'Train1.csv')
 	#plotGMM(GMM1, 'Train1.csv')
 	print GMM1.piList
 	print GMM1.meanList

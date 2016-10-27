@@ -2,5 +2,6 @@
 *.docx
 ./Kmeans/.idea/*
 *.pdf
-./Perceptron/Muticlass/report/*
+Perceptron/Muticlass/report/*
+
 
