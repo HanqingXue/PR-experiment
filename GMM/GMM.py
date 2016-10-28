@@ -45,10 +45,12 @@ class GMM(object):
 		self.algothrim()
 
 	def loaddata(self):
+
 		self.traindata = np.loadtxt(self.trfname, delimiter=',')
+		#print self.traindata
 		for i in range(self.Mnum):
 			self.piList.append(1.0/self.Mnum)
-		kmeans = KMeans(n_clusters=4, random_state=0).fit(self.traindata)
+		kmeans = KMeans(n_clusters=2, random_state=0).fit(self.traindata)
 		self.meanList = kmeans.cluster_centers_
 
 
@@ -69,7 +71,7 @@ class GMM(object):
 			#E steps
 		count = 0
 		while True:
-			print '{}th itor'.format(str(count))
+			#print '{}th itor'.format(str(count))
 			count += 1
 			oldlikehood = copy.deepcopy(self.likehoods)
 			gauss =  self.guassList
@@ -149,6 +151,8 @@ class GMM(object):
 				likehood += self.piList[k]*self.guassList[k].N(self.traindata[n])
 			sumlikehood += logn(e, likehood)
 		self.likehoods = sumlikehood
+		if sumlikehood == 0:
+			self.likehoods = 0.00001
 
 	def problailty(self, sample):
 		prob = 0.0
@@ -230,7 +234,25 @@ class plotGMM(object):
 		plt.scatter(0, 0, s=25, marker='D', color='r')
 		plt.savefig('sketck.jpg')
 		plt.show()
-
+#class preparedata()
+class preparedata(object):
+	"""docstring for preparedata"""
+	def __init__(self, fname, label, labelnum):
+		super(preparedata, self).__init__()
+		self.name = fname
+		self.label = label
+		self.labelnum = labelnum
+		self.loaddata()
+	def loaddata(self):
+		self.data = np.loadtxt(self.name, delimiter=',')
+		self.labeldata = np.loadtxt(self.label, delimiter=',')
+		index = [i for i in range(0, self.data.shape[0])]
+		cluster = [[] for i in range(self.labelnum)]
+		for i, sample, label in zip(index, self.data, self.labeldata):
+			cluster[int(label)].append(sample)
+		for i in range(0, self.labelnum):
+			np.savetxt('class{0}.csv'.format(str(i)), cluster[i], fmt='%f',delimiter=',')
+		
 if __name__ == '__main__':
 	#GMM1 = GMM(2, 'Train2.csv')
 	#print GMM1.meanList
@@ -240,7 +262,27 @@ if __name__ == '__main__':
 	#print GMM1.piList
 	#print GMM1.meanList
 	#print GMM1.covList', delimiter=',')
-	#GMM2 = GMM(2, 'TrainSamples.csv')
-	#print GMM2.guassList[0].cov
-	a = np.loadtxt('Test1.csv', delimiter=',')
-	np.savetxt('temp.csv',fmt="%.10e", delimiter=',')
+	#
+	testdata = np.loadtxt('TestSamples.csv', delimiter=',')
+	print testdata.shape[0]
+
+	GMMlist  = []
+	for i in range(0, 10):
+		print 'Train{0}class:'.format(str(i))
+		gmm = GMM(2, 'class{0}.csv'.format(str(i)))
+		GMMlist.append(gmm)
+	print GMMlist
+	result = open('result2.csv', 'w')
+	for j in range(0, testdata.shape[0]):
+		pr = []
+		print 'The {0}th sample'.format(str(j))
+		for i in range(0, 10):
+			pr.append(GMMlist[i].problailty(testdata[j]))
+
+		MAX = max(pr)
+		for k in range(0, len(pr)):
+			if pr[k] == MAX:
+				result.write(str(k))
+				break
+		pass
+
