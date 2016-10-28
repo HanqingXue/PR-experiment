@@ -2,6 +2,7 @@ import numpy as np
 from numpy import *
 import math
 import copy
+import time
 from numpy.lib.scimath import logn
 from math import e
 from matplotlib.patches import Ellipse, Circle
@@ -50,7 +51,7 @@ class GMM(object):
 		#print self.traindata
 		for i in range(self.Mnum):
 			self.piList.append(1.0/self.Mnum)
-		kmeans = KMeans(n_clusters=2, random_state=0).fit(self.traindata)
+		kmeans = KMeans(n_clusters=self.Mnum, random_state=0).fit(self.traindata)
 		self.meanList = kmeans.cluster_centers_
 
 
@@ -268,11 +269,14 @@ if __name__ == '__main__':
 
 	GMMlist  = []
 	for i in range(0, 10):
-		print 'Train{0}class:'.format(str(i))
-		gmm = GMM(2, 'class{0}.csv'.format(str(i)))
+		start = time.clock()
+		print 'Train {0}th class:'.format(str(i))
+		gmm = GMM(3, 'class{0}.csv'.format(str(i)))
 		GMMlist.append(gmm)
+		end = time.clock()
+		print 'The {0} class take {1} sec'.format(str(i), str(end - start))
 	print GMMlist
-	result = open('result2.csv', 'w')
+	result = open('result3.csv', 'w')
 	for j in range(0, testdata.shape[0]):
 		pr = []
 		print 'The {0}th sample'.format(str(j))
@@ -282,7 +286,7 @@ if __name__ == '__main__':
 		MAX = max(pr)
 		for k in range(0, len(pr)):
 			if pr[k] == MAX:
-				result.write(str(k))
+				result.write(str(k)+'\n')
 				break
 		pass
 
