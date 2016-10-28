@@ -48,11 +48,17 @@ class GMM(object):
 		self.traindata = np.loadtxt(self.trfname, delimiter=',')
 		for i in range(self.Mnum):
 			self.piList.append(1.0/self.Mnum)
-		kmeans = KMeans(n_clusters=2, random_state=0).fit(self.traindata)
+		kmeans = KMeans(n_clusters=4, random_state=0).fit(self.traindata)
 		self.meanList = kmeans.cluster_centers_
-		dim = len(self.traindata[0])
-		for item in self.meanList:
-			self.covList.append(np.mat(eye(dim,dim,dtype=int)))
+
+
+		clusters = [ [] for i in range(self.Mnum)]
+		for i in range(self.traindata.shape[0]):
+			for k in range(self.Mnum):
+				if kmeans.labels_[i] == k:
+					clusters[k].append(self.traindata[i].T)
+		self.covList = [np.cov(np.matrix(clusters[i]).T) for i in range(0, self.Mnum)]
+
 
 		for i in range(0, self.Mnum):
 			guassModel = Guass(self.meanList[i], self.covList[i])
@@ -63,7 +69,7 @@ class GMM(object):
 			#E steps
 		count = 0
 		while True:
-			#print '{}th itor'.format(str(count))
+			print '{}th itor'.format(str(count))
 			count += 1
 			oldlikehood = copy.deepcopy(self.likehoods)
 			gauss =  self.guassList
@@ -226,9 +232,15 @@ class plotGMM(object):
 		plt.show()
 
 if __name__ == '__main__':
-	GMM1 = GMM(2, 'Train2.csv')
-	print 'ok'
+	#GMM1 = GMM(2, 'Train2.csv')
+	#print GMM1.meanList
+	#print GMM1.covList
+	#print GMM1.piList
 	#plotGMM(GMM1, 'Train1.csv')
 	#print GMM1.piList
 	#print GMM1.meanList
-	#print GMM1.covList
+	#print GMM1.covList', delimiter=',')
+	#GMM2 = GMM(2, 'TrainSamples.csv')
+	#print GMM2.guassList[0].cov
+	a = np.loadtxt('Test1.csv', delimiter=',')
+	np.savetxt('temp.csv',fmt="%.10e", delimiter=',')
