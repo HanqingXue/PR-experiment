@@ -9,6 +9,8 @@ from matplotlib.patches import Ellipse, Circle
 import matplotlib.pyplot as plt
 import random
 from sklearn.cluster import KMeans
+from sklearn.metrics import f1_score, classification_report
+
 class Guass(object):
 	"""docstring for Guass"""
 	def __init__(self, mean, cov):
@@ -253,17 +255,28 @@ class preparedata(object):
 			cluster[int(label)].append(sample)
 		for i in range(0, self.labelnum):
 			np.savetxt('class{0}.csv'.format(str(i)), cluster[i], fmt='%f',delimiter=',')
+class TestOnMNIST(object):
+	"""docstring for TestOnMNIST"""
+	def __init__(self):
+		super(TestOnMNIST, self).__init__()
+	
+	def test(self):
+		self.labeldata = np.loadtxt('TestLabels.csv', delimiter=',')
+		for i in range(1, 6):
+			data = np.loadtxt('result{0}.csv'.format(str(i)), delimiter=',')
+			report = classification_report(self.labeldata, data)
+			f = open('report{0}.csv'.format(str(i)), 'w')
+			report = report.replace('      ', ',')
+			f.write(report)
+			f.close()
+		pass
+		
 		
 if __name__ == '__main__':
-	#GMM1 = GMM(2, 'Train2.csv')
-	#print GMM1.meanList
-	#print GMM1.covList
-	#print GMM1.piList
-	#plotGMM(GMM1, 'Train1.csv')
-	#print GMM1.piList
-	#print GMM1.meanList
-	#print GMM1.covList', delimiter=',')
-	#
+	'''
+	Test GMM model on the 
+	'''
+	'''
 	testdata = np.loadtxt('TestSamples.csv', delimiter=',')
 	print testdata.shape[0]
 
@@ -271,12 +284,12 @@ if __name__ == '__main__':
 	for i in range(0, 10):
 		start = time.clock()
 		print 'Train {0}th class:'.format(str(i))
-		gmm = GMM(3, 'class{0}.csv'.format(str(i)))
+		gmm = GMM(5, 'class{0}.csv'.format(str(i)))
 		GMMlist.append(gmm)
 		end = time.clock()
 		print 'The {0} class take {1} sec'.format(str(i), str(end - start))
 	print GMMlist
-	result = open('result3.csv', 'w')
+	result = open('result5.csv', 'w')
 	for j in range(0, testdata.shape[0]):
 		pr = []
 		print 'The {0}th sample'.format(str(j))
@@ -288,5 +301,15 @@ if __name__ == '__main__':
 			if pr[k] == MAX:
 				result.write(str(k)+'\n')
 				break
-		pass
+	'''
 
+	T = TestOnMNIST()
+	T.test()
+	f = open('report1.txt')
+	'''
+	for item in f:
+		print item
+		item = item.replace('      ', ',')
+
+		print item
+	'''
