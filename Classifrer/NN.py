@@ -16,7 +16,7 @@ start = time.time()
 classifier = MLPClassifier(alpha=1)
 classifier.fit(data, label)
 predictions = classifier.predict(test)
-reportname = 'MN1.txt'
+reportname = 'NN1.txt'
 report = open('./result/'+reportname, 'w')
 r = classification_report(testLabel, predictions)
 report.write(r)
