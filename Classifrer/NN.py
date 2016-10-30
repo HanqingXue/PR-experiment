@@ -17,9 +17,12 @@ classifier = MLPClassifier(alpha=1)
 classifier.fit(data, label)
 predictions = classifier.predict(test)
 reportname = 'NN1.txt'
-report = open('./result/'+reportname, 'w')
+#report = open('./result/'+reportname, 'w')
+print predictions
+np.savetxt('Result.csv', predictions, fmt="%d")
 r = classification_report(testLabel, predictions)
-report.write(r)
+print r
+#report.write(r)
 end = time.time()
-report.write('time{0}'.format(str(end - start)))
-report.close()
+#report.write('time{0}'.format(str(end - start)))
+#report.close()
